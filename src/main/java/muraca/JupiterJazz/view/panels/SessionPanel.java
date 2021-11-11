@@ -1,8 +1,9 @@
-package muraca.JupiterJazz.view;
+package muraca.JupiterJazz.view.panels;
 
 import muraca.JupiterJazz.model.Note;
 import muraca.JupiterJazz.model.Session;
 import muraca.JupiterJazz.model.TimeSignature;
+import muraca.JupiterJazz.view.utils.FileHandler;
 import muraca.JupiterJazz.view.utils.RangeSlider;
 import muraca.JupiterJazz.view.utils.SimpleDocumentListener;
 
@@ -37,6 +38,8 @@ public class SessionPanel extends JPanel {
         add(createTempoPanel());
         add(createNotePanel());
         add(createPausePanel());
+        add(createKeyPanel());
+        add(createSavePanel());
 
         setSession(session);
     }
@@ -234,5 +237,31 @@ public class SessionPanel extends JPanel {
         pausePanel.add(pauseDurationValuesLabel);
 
         return pausePanel;
+    }
+
+    private JPanel createKeyPanel() {
+        JPanel keyPanel = new JPanel(new FlowLayout());
+        // TODO
+        return keyPanel;
+    }
+
+    private JPanel createSavePanel() {
+        JPanel savePanel = new JPanel(new FlowLayout());
+
+        JButton saveSessionButton = new JButton("Save current Session");
+        saveSessionButton.setMinimumSize(new Dimension(256, 64));
+        saveSessionButton.setMaximumSize(new Dimension(256, 64));
+        saveSessionButton.setPreferredSize(new Dimension(256, 64));
+        saveSessionButton.addActionListener(e -> session.saveSessionAsFile(FileHandler.chooseXMLFile(this, FileHandler.SAVE_FILE)));
+        savePanel.add(saveSessionButton);
+
+        JButton generateIEEE1599Button = new JButton("Generate IEEE1599");
+        generateIEEE1599Button.setMinimumSize(new Dimension(256, 64));
+        generateIEEE1599Button.setMaximumSize(new Dimension(256, 64));
+        generateIEEE1599Button.setPreferredSize(new Dimension(256, 64));
+        generateIEEE1599Button.addActionListener(e -> session.generateIEEE1599());
+        savePanel.add(generateIEEE1599Button);
+
+        return savePanel;
     }
 }

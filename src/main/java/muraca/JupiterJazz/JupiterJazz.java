@@ -1,6 +1,8 @@
 package muraca.JupiterJazz;
 
-import muraca.JupiterJazz.view.*;
+import muraca.JupiterJazz.model.Session;
+import muraca.JupiterJazz.view.panels.*;
+import muraca.JupiterJazz.view.utils.FileHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,15 +47,18 @@ public class JupiterJazz extends JFrame {
         JMenu file = new JMenu("File");
 
         JMenuItem newSession = new JMenuItem("New Session");
-        newSession.addActionListener(a -> {});
+        newSession.addActionListener(a -> {
+            sessionPanel.setSession(new Session());
+            layout.show(container, "session");
+        });
         file.add(newSession);
 
         JMenuItem openSession = new JMenuItem("Open existing Session");
-        openSession.addActionListener(a -> {});
+        openSession.addActionListener(a -> sessionPanel.setSession(Session.loadFromFile(FileHandler.chooseXMLFile(this, FileHandler.OPEN_FILE))));
         file.add(openSession);
 
         JMenuItem saveCurrentSession = new JMenuItem("Save current Session");
-        saveCurrentSession.addActionListener(a -> {});
+        saveCurrentSession.addActionListener(a -> sessionPanel.getSession().saveSessionAsFile(FileHandler.chooseXMLFile(this, FileHandler.SAVE_FILE)));
         file.add(saveCurrentSession);
 
         file.addSeparator();

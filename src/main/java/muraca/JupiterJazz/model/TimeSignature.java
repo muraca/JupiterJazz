@@ -30,4 +30,8 @@ public class TimeSignature {
 
         return new TimeSignature(num, den);
     }
+
+    public String toString() {
+        return String.valueOf(beatsPerMeasure) + "/" + String.valueOf(inverseBeatNoteLength);
+    }
 }
