@@ -4,7 +4,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Random;
 
 public class IEEE1599XML {
@@ -15,7 +17,7 @@ public class IEEE1599XML {
 
     }
 
-    public static void saveToXML(Session s) {
+    public static void saveToXML(Session s, File file) {
         try {
             Document doc = DocumentUtils.newDocument();
 
@@ -46,7 +48,7 @@ public class IEEE1599XML {
 
             int id = 0;
             final int measureDurationInVTU = Constants.TIME_SIGNATURES_VTU.get(Constants.TIME_SIGNATURES_FRAC.indexOf(s.getTimeSignature().toString()));
-            for (Instrument instrumentInInstruments: s.getInstruments()) {
+            for (Instrument instrument: s.getInstruments()) {
                 id++;
                 Element staff = doc.createElement("staff");
                 staff_list.appendChild(staff);
@@ -71,8 +73,8 @@ public class IEEE1599XML {
                 staff.appendChild(clef);
                 clef.setAttribute("event_ref", "Clef_Instrument_"+id+"_1");
                 clef.setAttribute("octave_num", "0");
-                clef.setAttribute("shape", instrumentInInstruments.getClefShape());
-                clef.setAttribute("staff_step", instrumentInInstruments.getClefStaffStep());
+                clef.setAttribute("shape", instrument.getClefShape());
+                clef.setAttribute("staff_step", instrument.getClefStaffStep());
 
                 Element clefEvent = doc.createElement("event");
                 spine.appendChild(clefEvent);
@@ -108,10 +110,9 @@ public class IEEE1599XML {
                             isRest = false; //must be a note
                         }
 
-
                         int minDurationIndex = isRest ? s.getMinPauseDurationIndex() : s.getMinNoteDurationIndex();
                         int maxDurationIndex = Math.min(Constants.EVENT_DURATIONS_VTU.indexOf(currentMeasureRemainingDuration),
-                                                   isRest ? s.getMaxPauseDurationIndex() : s.getMaxNoteDurationIndex());;
+                                                        isRest ? s.getMaxPauseDurationIndex() : s.getMaxNoteDurationIndex());;
 
                         int eventDurationIndex = random.nextInt(maxDurationIndex - minDurationIndex + 1) + minDurationIndex;
                         int eventDurationVTU = Constants.EVENT_DURATIONS_VTU.get(eventDurationIndex);
@@ -132,14 +133,35 @@ public class IEEE1599XML {
                         partEventDuration.setAttribute("den", String.valueOf(eventDuration.getDen()));
 
                         if (!isRest) {
-                            //TODO randomize note
+                            Element notehead = doc.createElement("notehead");
+                            partEvent.appendChild(notehead);
+
+                            Element pitch = doc.createElement("pitch");
+                            notehead.appendChild(pitch);
+                            Tonality tonality = s.getTonality();
+                            int noteIndex = random.nextInt(tonality.getNumberOfNotesInKey());
+                            int octave = 0;
+                            int midiPitch = s.getTonality().getNote(noteIndex);
+                            while (midiPitch < instrument.getMinPitch() || midiPitch > instrument.getMaxPitch()){
+                                noteIndex = random.nextInt(tonality.getNumberOfNotesInKey());
+                                octave = random.nextInt(9);
+                            }
+                            pitch.setAttribute("step", tonality.getNoteName(noteIndex));
+                            pitch.setAttribute("actual_accidental", tonality.getNoteAccidental(noteIndex));
+                            pitch.setAttribute("octave", String.valueOf(octave));
+
+                            Element printed_accidentals = doc.createElement("printed_accidentals");
+                            pitch.appendChild(printed_accidentals);
+                            Element accidental = doc.createElement(s.getTonality().getNoteAccidental(noteIndex));
+                            printed_accidentals.appendChild(accidental);
                         }
                     }
                 }
             }
 
+            DocumentUtils.transform(doc, file);
 
-        } catch (ParserConfigurationException e) {
+        } catch (ParserConfigurationException | FileNotFoundException | TransformerException e) {
             //TODO
         }
     }

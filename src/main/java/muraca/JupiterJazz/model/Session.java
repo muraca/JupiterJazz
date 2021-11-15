@@ -30,10 +30,10 @@ public class Session {
     private int minPauseDurationIndex = 4;
     private int maxPauseDurationIndex = Constants.EVENT_DURATIONS_SIZE - 3;
 
-    //TODO pitch and key
-
     private int minPitch = 1;
     private int maxPitch = 88;
+
+    private Tonality tonality = new Tonality(); //TODO
 
     private List<Instrument> instruments;
 
@@ -89,13 +89,13 @@ public class Session {
                 s.setMaxPauseDurationIndex(Integer.parseInt(pauseDuration.getAttributes().getNamedItem("max").getTextContent()));
             } catch (Exception e) { }
 
-            //TODO key
-
             try {
                 Node pitch = doc.getDocumentElement().getElementsByTagName("Pitch").item(0);
                 s.setMinPitch(Integer.parseInt(pitch.getAttributes().getNamedItem("min").getTextContent()));
                 s.setMaxPitch(Integer.parseInt(pitch.getAttributes().getNamedItem("max").getTextContent()));
             } catch (Exception e) { }
+
+            //TODO tonality
 
 
         } catch (ParserConfigurationException | SAXException | IOException e) {
@@ -109,60 +109,59 @@ public class Session {
 
     public void saveSessionAsFile(File file) {
         try {
-            Document dom = DocumentUtils.newDocument();
-            Element root = dom.createElement("Session");
+            Document doc = DocumentUtils.newDocument();
+            Element root = doc.createElement("Session");
+            doc.appendChild(root);
 
-            Element e = dom.createElement("Author");
+            Element e = doc.createElement("Author");
             e.setTextContent(author);
             root.appendChild(e);
 
-            e = dom.createElement("Title");
+            e = doc.createElement("Title");
             e.setTextContent(String.valueOf(title));
             root.appendChild(e);
 
-            e = dom.createElement("BPM");
+            e = doc.createElement("BPM");
             e.setTextContent(String.valueOf(bpm));
             root.appendChild(e);
 
-            e = dom.createElement("TimeSignature");
+            e = doc.createElement("TimeSignature");
             e.setTextContent(timeSignature.toString());
             root.appendChild(e);
 
-            e = dom.createElement("DurationInMeasures");
+            e = doc.createElement("DurationInMeasures");
             e.setTextContent(String.valueOf(durationInMeasures));
             root.appendChild(e);
 
-            e = dom.createElement("PauseProbability");
+            e = doc.createElement("PauseProbability");
             e.setTextContent(String.valueOf(pauseProbability));
             root.appendChild(e);
 
-            e = dom.createElement("NoteDuration");
+            e = doc.createElement("NoteDuration");
             e.setAttribute("min", String.valueOf(minNoteDurationIndex));
             e.setAttribute("max", String.valueOf(maxNoteDurationIndex));
             root.appendChild(e);
 
-            e = dom.createElement("PauseDuration");
+            e = doc.createElement("PauseDuration");
             e.setAttribute("min", String.valueOf(minPauseDurationIndex));
             e.setAttribute("max", String.valueOf(maxPauseDurationIndex));
             root.appendChild(e);
 
-            //TODO key
-
-            e = dom.createElement("Pitch");
+            e = doc.createElement("Pitch");
             e.setAttribute("min", String.valueOf(minPitch));
             e.setAttribute("max", String.valueOf(maxPitch));
             root.appendChild(e);
 
-            dom.appendChild(root);
+            //TODO tonality
 
-            DocumentUtils.transform(dom, file);
+            DocumentUtils.transform(doc, file);
 
         } catch (FileNotFoundException | TransformerException | ParserConfigurationException e) {
             //TODO
         }
     }
 
-    public void generateIEEE1599() { //TODO
-        IEEE1599XML.saveToXML(this);
+    public void generateIEEE1599(File file) { //TODO
+        IEEE1599XML.saveToXML(this, file);
     }
 }
