@@ -1,8 +1,8 @@
 package muraca.JupiterJazz.view.panels;
 
-import muraca.JupiterJazz.model.Note;
+import muraca.JupiterJazz.model.Constants;
+import muraca.JupiterJazz.model.Fraction;
 import muraca.JupiterJazz.model.Session;
-import muraca.JupiterJazz.model.TimeSignature;
 import muraca.JupiterJazz.view.utils.FileHandler;
 import muraca.JupiterJazz.view.utils.RangeSlider;
 import muraca.JupiterJazz.view.utils.SimpleDocumentListener;
@@ -58,13 +58,13 @@ public class SessionPanel extends JPanel {
         authorField.setText(session.getAuthor());
         titleField.setText(session.getTitle());
         bpmSlider.setValue(session.getBpm());
-        timeSignatureComboBox.setSelectedItem(session.getTimeSignature());
+        timeSignatureComboBox.setSelectedItem(session.getTimeSignature().toString());
         durationInMeasuresField.setText(String.valueOf(session.getDurationInMeasures()));
         durationInSecondsField.setText(String.valueOf(session.getDurationInSeconds()));
         noteProbabilitySlider.setValue(100 - session.getPauseProbability());
-        noteDurationSlider.setValues(session.getMinNoteDuration(), session.getMaxNoteDuration());
+        noteDurationSlider.setValues(session.getMinNoteDurationIndex(), session.getMaxNoteDurationIndex());
         pauseProbabilitySlider.setValue(session.getPauseProbability());
-        pauseDurationSlider.setValues(session.getMinPauseDuration(), session.getMaxPauseDuration());
+        pauseDurationSlider.setValues(session.getMinPauseDurationIndex(), session.getMaxPauseDurationIndex());
 
         revalidate();
         repaint();
@@ -115,11 +115,11 @@ public class SessionPanel extends JPanel {
         tempoPanel.add(bpmValueLabel);
 
         timeSignatureComboBox = new JComboBox<>();
-        for (String t: TimeSignature.TIME_SIGNATURES) {
+        for (String t: Constants.TIME_SIGNATURES_FRAC) {
             timeSignatureComboBox.addItem(t);
         }
         timeSignatureComboBox.addActionListener(e -> {
-            session.setTimeSignature(TimeSignature.parseString(timeSignatureComboBox.getSelectedItem().toString()));
+            session.setTimeSignature(Fraction.parseString(timeSignatureComboBox.getSelectedItem().toString()));
             durationInSecondsField.setText(String.valueOf(session.getDurationInSeconds()));
         });
         JLabel timeSignatureLabel = new JLabel("Time signature");
@@ -155,7 +155,7 @@ public class SessionPanel extends JPanel {
         return tempoPanel;
     }
 
-    private JPanel createNotePanel() {
+    private JPanel createNotePanel() { //TODO single reusable method
         JPanel notePanel = new JPanel(new FlowLayout());
 
         JLabel noteProbabilityValueLabel = new JLabel("50%");
@@ -182,11 +182,11 @@ public class SessionPanel extends JPanel {
         noteDurationValuesLabel.setMinimumSize(new Dimension(160, 16));
         noteDurationValuesLabel.setMaximumSize(new Dimension(160, 16));
         noteDurationValuesLabel.setPreferredSize(new Dimension(160, 16));
-        noteDurationSlider = new RangeSlider(0, Note.DURATIONS.length-1);
+        noteDurationSlider = new RangeSlider(0, Constants.EVENT_DURATIONS_SIZE-1);
         noteDurationSlider.addChangeListener(e -> {
-            session.setMinNoteDuration(noteDurationSlider.getValue());
-            session.setMaxNoteDuration(noteDurationSlider.getUpperValue());
-            noteDurationValuesLabel.setText("min: " + Note.DURATIONS[noteDurationSlider.getValue()] + ", max: " + Note.DURATIONS[noteDurationSlider.getUpperValue()]);
+            session.setMinNoteDurationIndex(noteDurationSlider.getValue());
+            session.setMaxNoteDurationIndex(noteDurationSlider.getUpperValue());
+            noteDurationValuesLabel.setText("min: " + Constants.EVENT_DURATIONS_FRAC.get(noteDurationSlider.getValue()) + ", max: " + Constants.EVENT_DURATIONS_FRAC.get(noteDurationSlider.getUpperValue()));
         });
         JLabel noteDurationLabel = new JLabel("Note duration");
         noteDurationLabel.setLabelFor(noteDurationSlider);
@@ -197,7 +197,7 @@ public class SessionPanel extends JPanel {
         return notePanel;
     }
 
-    private JPanel createPausePanel() {
+    private JPanel createPausePanel() { //TODO single reusable method
         JPanel pausePanel = new JPanel(new FlowLayout());
 
         JLabel pauseProbabilityValueLabel = new JLabel("50%");
@@ -224,11 +224,11 @@ public class SessionPanel extends JPanel {
         pauseDurationValuesLabel.setMinimumSize(new Dimension(160, 16));
         pauseDurationValuesLabel.setMaximumSize(new Dimension(160, 16));
         pauseDurationValuesLabel.setPreferredSize(new Dimension(160, 16));
-        pauseDurationSlider = new RangeSlider(0, Note.DURATIONS.length-1);
+        pauseDurationSlider = new RangeSlider(0, Constants.EVENT_DURATIONS_SIZE-1);
         pauseDurationSlider.addChangeListener(e -> {
-            session.setMinPauseDuration(pauseDurationSlider.getValue());
-            session.setMaxPauseDuration(pauseDurationSlider.getUpperValue());
-            pauseDurationValuesLabel.setText("min: " + Note.DURATIONS[pauseDurationSlider.getValue()] + ", max: " + Note.DURATIONS[pauseDurationSlider.getUpperValue()]);
+            session.setMinPauseDurationIndex(pauseDurationSlider.getValue());
+            session.setMaxPauseDurationIndex(pauseDurationSlider.getUpperValue());
+            pauseDurationValuesLabel.setText("min: " + Constants.EVENT_DURATIONS_FRAC.get(pauseDurationSlider.getValue()) + ", max: " + Constants.EVENT_DURATIONS_FRAC.get(pauseDurationSlider.getUpperValue()));
         });
         JLabel pauseDurationLabel = new JLabel("Pause duration");
         pauseDurationLabel.setLabelFor(pauseDurationSlider);
