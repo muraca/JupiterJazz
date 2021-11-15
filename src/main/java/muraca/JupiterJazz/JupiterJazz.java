@@ -68,7 +68,7 @@ public class JupiterJazz extends JFrame {
         file.add(importIEEE1599);
 
         JMenuItem exportIEEE1599 = new JMenuItem("Export IEEE1599 XML file");
-        exportIEEE1599.addActionListener(a -> {});
+        exportIEEE1599.addActionListener(a -> sessionPanel.getSession().generateIEEE1599(FileHandler.chooseXMLFile(this, FileHandler.SAVE_FILE)));
         file.add(exportIEEE1599);
 
         file.addSeparator();
@@ -88,7 +88,10 @@ public class JupiterJazz extends JFrame {
         help.add(helpItem);
 
         JMenuItem about = new JMenuItem("About");
-        about.addActionListener(a -> {});
+        about.addActionListener(a -> JOptionPane.showMessageDialog(this,
+                "JupiterJazz is a project made by Matteo Muraca id 984277\nfor \"Programmazione per la musica\" course at UniMi, AA 2021/2022",
+                "About JupiterJazz",
+                JOptionPane.INFORMATION_MESSAGE));
         help.add(about);
 
         menuBar.add(help);

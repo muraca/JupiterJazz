@@ -259,7 +259,7 @@ public class SessionPanel extends JPanel {
         generateIEEE1599Button.setMinimumSize(new Dimension(256, 64));
         generateIEEE1599Button.setMaximumSize(new Dimension(256, 64));
         generateIEEE1599Button.setPreferredSize(new Dimension(256, 64));
-        generateIEEE1599Button.addActionListener(e -> session.generateIEEE1599());
+        generateIEEE1599Button.addActionListener(e -> session.generateIEEE1599(FileHandler.chooseXMLFile(this, FileHandler.SAVE_FILE)));
         savePanel.add(generateIEEE1599Button);
 
         return savePanel;
