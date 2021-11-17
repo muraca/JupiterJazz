@@ -20,6 +20,8 @@ public class JupiterJazz extends JFrame {
     public JupiterJazz() {
         super("Jupiter Jazz");
 
+        FileHandler.setParent(this);
+
         layout = new CardLayout();
         container = getContentPane();
         container.setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -54,11 +56,11 @@ public class JupiterJazz extends JFrame {
         file.add(newSession);
 
         JMenuItem openSession = new JMenuItem("Open existing Session");
-        openSession.addActionListener(a -> sessionPanel.setSession(Session.loadFromFile(FileHandler.chooseXMLFile(this, FileHandler.OPEN_FILE))));
+        openSession.addActionListener(a -> sessionPanel.setSession(Session.loadFromFile(FileHandler.chooseXMLFile(FileHandler.OPEN_FILE))));
         file.add(openSession);
 
         JMenuItem saveCurrentSession = new JMenuItem("Save current Session");
-        saveCurrentSession.addActionListener(a -> sessionPanel.getSession().saveSessionAsFile(FileHandler.chooseXMLFile(this, FileHandler.SAVE_FILE)));
+        saveCurrentSession.addActionListener(a -> sessionPanel.getSession().saveSessionAsFile(FileHandler.chooseXMLFile(FileHandler.SAVE_FILE)));
         file.add(saveCurrentSession);
 
         file.addSeparator();
@@ -68,7 +70,7 @@ public class JupiterJazz extends JFrame {
         file.add(importIEEE1599);
 
         JMenuItem exportIEEE1599 = new JMenuItem("Export IEEE1599 XML file");
-        exportIEEE1599.addActionListener(a -> sessionPanel.getSession().generateIEEE1599(FileHandler.chooseXMLFile(this, FileHandler.SAVE_FILE)));
+        exportIEEE1599.addActionListener(a -> sessionPanel.getSession().generateIEEE1599(FileHandler.chooseXMLFile(FileHandler.SAVE_FILE)));
         file.add(exportIEEE1599);
 
         file.addSeparator();

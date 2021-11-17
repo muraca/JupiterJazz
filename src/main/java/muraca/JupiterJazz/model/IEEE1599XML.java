@@ -1,5 +1,7 @@
 package muraca.JupiterJazz.model;
 
+import muraca.JupiterJazz.view.utils.ErrorHandler;
+import muraca.JupiterJazz.view.utils.FileHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -14,7 +16,7 @@ public class IEEE1599XML {
     private static Random random = new Random();
 
     public static void readFromXML(File f) {
-
+        
     }
 
     public static void saveToXML(Session s, File file) {
@@ -161,8 +163,10 @@ public class IEEE1599XML {
 
             DocumentUtils.transform(doc, file);
 
-        } catch (ParserConfigurationException | FileNotFoundException | TransformerException e) {
-            //TODO
+        } catch (FileNotFoundException e) {
+            FileHandler.fileNotFoundExceptionInfo(file.getName());
+        } catch (ParserConfigurationException | TransformerException e) {
+            ErrorHandler.xmlExportException(file.getName());
         }
     }
 }

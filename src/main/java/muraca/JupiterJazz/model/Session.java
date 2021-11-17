@@ -1,6 +1,8 @@
 package muraca.JupiterJazz.model;
 
 import lombok.Data;
+import muraca.JupiterJazz.view.utils.ErrorHandler;
+import muraca.JupiterJazz.view.utils.FileHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -99,7 +101,7 @@ public class Session {
 
 
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            //TODO
+            ErrorHandler.xmlImportException(file.getName());
         }
 
         return s;
@@ -156,12 +158,14 @@ public class Session {
 
             DocumentUtils.transform(doc, file);
 
-        } catch (FileNotFoundException | TransformerException | ParserConfigurationException e) {
-            //TODO
+        } catch (FileNotFoundException e) {
+            FileHandler.fileNotFoundExceptionInfo(file.getName());
+        } catch (ParserConfigurationException | TransformerException e) {
+            ErrorHandler.xmlExportException(file.getName());
         }
     }
 
-    public void generateIEEE1599(File file) { //TODO
+    public void generateIEEE1599(File file) {
         IEEE1599XML.saveToXML(this, file);
     }
 }
