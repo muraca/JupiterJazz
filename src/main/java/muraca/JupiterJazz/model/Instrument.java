@@ -14,6 +14,8 @@ public abstract class Instrument {
     public int minPitch;
     public int maxPitch;
 
+    public String name;
+
     public int getMinPitch() {
         return Math.max(minPitch, session.getMinPitch());
     }

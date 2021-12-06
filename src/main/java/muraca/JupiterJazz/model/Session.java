@@ -35,7 +35,7 @@ public class Session {
     private int minPitch = 1;
     private int maxPitch = 88;
 
-    private Tonality tonality = new Tonality(); //TODO
+    private Tonality tonality = new Tonality();
 
     private List<Instrument> instruments;
 
@@ -56,7 +56,7 @@ public class Session {
     }
 
     public float getDurationInSeconds() {
-        float beatDurationInSeconds = 60.f / bpm * 4.f / timeSignature.getDen();
+        float beatDurationInSeconds = 60.f / bpm;
         float durationInSeconds = timeSignature.getNum() * beatDurationInSeconds * durationInMeasures;
         return Math.round(durationInSeconds * 10) / 10.f; //only one decimal digit
     }
@@ -97,8 +97,16 @@ public class Session {
                 s.setMaxPitch(Integer.parseInt(pitch.getAttributes().getNamedItem("max").getTextContent()));
             } catch (Exception e) { }
 
-            //TODO tonality
-
+            try {
+                Node tonality = doc.getDocumentElement().getElementsByTagName("Tonality").item(0);
+                for (int i = 0; i < tonality.getChildNodes().getLength(); ++i) {
+                    Node note = doc.getDocumentElement().getElementsByTagName("Note").item(i);
+                    int id = Integer.parseInt(note.getAttributes().getNamedItem("id").getTextContent());
+                    s.getTonality().enableNote(id);
+                    s.getTonality().setNoteName(id, Integer.valueOf(note.getAttributes().getNamedItem("name_pos").getTextContent()));
+                    s.getTonality().setNoteAccidental(id, Integer.valueOf(note.getAttributes().getNamedItem("accidental_pos").getTextContent()));
+                }
+            } catch (Exception e) { }
 
         } catch (ParserConfigurationException | SAXException | IOException e) {
             ErrorHandler.xmlImportException(file.getName());
@@ -154,7 +162,20 @@ public class Session {
             e.setAttribute("max", String.valueOf(maxPitch));
             root.appendChild(e);
 
-            //TODO tonality
+            e = doc.createElement("Tonality");
+            for (int i = 0; i < tonality.getNumberOfEnabledNotes(); ++i) {
+                Element n = doc.createElement("Note");
+                int id = tonality.getEnabledNoteId(i);
+                if (id == -1)
+                    break;
+                n.setAttribute("id", String.valueOf(id));
+                n.setAttribute("name", String.valueOf(tonality.getNoteName(id)));
+                n.setAttribute("name_pos", String.valueOf(tonality.getNoteNamePos(id)));
+                n.setAttribute("accidental", String.valueOf(tonality.getNoteAccidental(id)));
+                n.setAttribute("accidental_pos", String.valueOf(tonality.getNoteAccidentalPos(id)));
+                e.appendChild(n);
+            }
+            root.appendChild(e);
 
             DocumentUtils.transform(doc, file);
 

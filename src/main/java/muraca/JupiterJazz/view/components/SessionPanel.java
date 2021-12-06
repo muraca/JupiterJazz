@@ -1,8 +1,9 @@
-package muraca.JupiterJazz.view.panels;
+package muraca.JupiterJazz.view.components;
 
 import muraca.JupiterJazz.model.Constants;
 import muraca.JupiterJazz.model.Fraction;
 import muraca.JupiterJazz.model.Session;
+import muraca.JupiterJazz.view.components.keyboard.KeyboardComponent;
 import muraca.JupiterJazz.view.utils.FileHandler;
 import muraca.JupiterJazz.view.utils.RangeSlider;
 import muraca.JupiterJazz.view.utils.SimpleDocumentListener;
@@ -29,6 +30,8 @@ public class SessionPanel extends JPanel {
 
     private JSlider pauseProbabilitySlider;
     private RangeSlider pauseDurationSlider;
+
+    private KeyboardComponent keyboardComponent;
 
     public SessionPanel(Session session) {
         super(null);
@@ -65,6 +68,8 @@ public class SessionPanel extends JPanel {
         noteDurationSlider.setValues(session.getMinNoteDurationIndex(), session.getMaxNoteDurationIndex());
         pauseProbabilitySlider.setValue(session.getPauseProbability());
         pauseDurationSlider.setValues(session.getMinPauseDurationIndex(), session.getMaxPauseDurationIndex());
+
+        keyboardComponent.setTonality(session.getTonality());
 
         revalidate();
         repaint();
@@ -240,8 +245,14 @@ public class SessionPanel extends JPanel {
     }
 
     private JPanel createKeyPanel() {
-        JPanel keyPanel = new JPanel(new FlowLayout());
-        // TODO
+        JPanel keyPanel = new JPanel(null);
+        keyPanel.setLayout(new BoxLayout(keyPanel, BoxLayout.PAGE_AXIS));
+        keyboardComponent = new KeyboardComponent();
+        keyPanel.add(keyboardComponent);
+
+        JPanel comboBoxPanel = new JPanel(new FlowLayout());
+        keyPanel.add(comboBoxPanel);
+
         return keyPanel;
     }
 

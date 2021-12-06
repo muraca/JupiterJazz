@@ -1,7 +1,7 @@
 package muraca.JupiterJazz;
 
 import muraca.JupiterJazz.model.Session;
-import muraca.JupiterJazz.view.panels.*;
+import muraca.JupiterJazz.view.components.*;
 import muraca.JupiterJazz.view.utils.FileHandler;
 
 import javax.swing.*;
@@ -111,7 +111,7 @@ public class JupiterJazz extends JFrame {
     public void setPanel(String name) { layout.show(container, name); }
 
     public JPanel getPanel(String name) {
-        for(Component c: container.getComponents()) {
+        for (Component c: container.getComponents()) {
             if (c.getName().equalsIgnoreCase(name) && c instanceof JPanel) {
                 return (JPanel) c;
             }

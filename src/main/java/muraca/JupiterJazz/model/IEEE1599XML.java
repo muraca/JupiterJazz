@@ -16,7 +16,7 @@ public class IEEE1599XML {
     private static Random random = new Random();
 
     public static void readFromXML(File f) {
-        
+
     }
 
     public static void saveToXML(Session s, File file) {
@@ -48,18 +48,18 @@ public class IEEE1599XML {
             Element staff_list = doc.createElement("staff_list");
             los.appendChild(staff_list);
 
-            int id = 0;
             final int measureDurationInVTU = Constants.TIME_SIGNATURES_VTU.get(Constants.TIME_SIGNATURES_FRAC.indexOf(s.getTimeSignature().toString()));
             for (Instrument instrument: s.getInstruments()) {
-                id++;
+                String name = instrument.getName();
+
                 Element staff = doc.createElement("staff");
                 staff_list.appendChild(staff);
-                staff_list.setAttribute("id", "Instrument_"+id+"_staff");
+                staff_list.setAttribute("id", "Instrument_" + name + "_staff");
                 staff_list.setAttribute("line_number", "5");
 
                 Element time_signature = doc.createElement("time_signature");
                 staff.appendChild(time_signature);
-                time_signature.setAttribute("event_ref", "TimeSignature_Instrument_"+id+"_1");
+                time_signature.setAttribute("event_ref", "TimeSignature_Instrument_" + name + "_1");
                 Element time_indication = doc.createElement("time_indication");
                 time_signature.appendChild(time_indication);
                 time_indication.setAttribute("num", String.valueOf(s.getTimeSignature().getNum()));
@@ -67,20 +67,20 @@ public class IEEE1599XML {
 
                 Element time_signatureEvent = doc.createElement("event");
                 spine.appendChild(time_signatureEvent);
-                time_signatureEvent.setAttribute("id", "TimeSignature_Instrument_"+id+"_1");
+                time_signatureEvent.setAttribute("id", "TimeSignature_Instrument_" + name + "_1");
                 time_signatureEvent.setAttribute("hpos", "0");
                 time_signatureEvent.setAttribute("timing", "0");
 
                 Element clef = doc.createElement("clef");
                 staff.appendChild(clef);
-                clef.setAttribute("event_ref", "Clef_Instrument_"+id+"_1");
+                clef.setAttribute("event_ref", "Clef_Instrument_" + name + "_1");
                 clef.setAttribute("octave_num", "0");
                 clef.setAttribute("shape", instrument.getClefShape());
                 clef.setAttribute("staff_step", instrument.getClefStaffStep());
 
                 Element clefEvent = doc.createElement("event");
                 spine.appendChild(clefEvent);
-                clefEvent.setAttribute("id", "Clef_Instrument_"+id+"_1");
+                clefEvent.setAttribute("id", "Clef_Instrument_" + name + "_1");
                 clefEvent.setAttribute("hpos", "0");
                 clefEvent.setAttribute("timing", "0");
 
@@ -90,8 +90,8 @@ public class IEEE1599XML {
                 part.appendChild(voice_list);
                 Element voice_item = doc.createElement("voice_item");
                 voice_list.appendChild(voice_item);
-                voice_item.setAttribute("id", "Instrument_"+id+"_0_voice");
-                voice_item.setAttribute("staff_ref", "Instrument_"+id+"_staff");
+                voice_item.setAttribute("id", "Instrument_" + name + "_0_voice");
+                voice_item.setAttribute("staff_ref", "Instrument_" + name + "_staff");
 
                 for (int i = 1; i <= s.getDurationInMeasures(); ++i) {
                     Element measure = doc.createElement("measure");
@@ -100,11 +100,11 @@ public class IEEE1599XML {
 
                     Element voice = doc.createElement("voice");
                     measure.appendChild(measure);
-                    voice.setAttribute("voice_item_ref", "Instrument_"+id+"_0_voice");
+                    voice.setAttribute("voice_item_ref", "Instrument_" + name + "_0_voice");
 
                     int currentMeasureRemainingDuration = measureDurationInVTU;
                     while (currentMeasureRemainingDuration != 0) {
-                        String eventId = "Instrument_"+id+"_voice0_measure1_ev"+voice.getChildNodes().getLength();
+                        String eventId = "Instrument_" + name + "_voice0_measure1_ev"+voice.getChildNodes().getLength();
 
                         boolean isRest = random.nextInt(100) < s.getPauseProbability();
                         if (isRest && currentMeasureRemainingDuration > s.getMaxPauseDurationVTU() && //min pause is longer than remaining time
@@ -141,20 +141,22 @@ public class IEEE1599XML {
                             Element pitch = doc.createElement("pitch");
                             notehead.appendChild(pitch);
                             Tonality tonality = s.getTonality();
-                            int noteIndex = random.nextInt(tonality.getNumberOfNotesInKey());
+                            int noteId = -1;
                             int octave = 0;
-                            int midiPitch = s.getTonality().getNote(noteIndex);
-                            while (midiPitch < instrument.getMinPitch() || midiPitch > instrument.getMaxPitch()){
-                                noteIndex = random.nextInt(tonality.getNumberOfNotesInKey());
+                            int midiPitch = 0;
+                            while ((midiPitch < instrument.getMinPitch() || midiPitch > instrument.getMaxPitch()) && noteId >= 0){
+                                int noteIndex = random.nextInt(tonality.getNumberOfEnabledNotes());
+                                noteId = tonality.getEnabledNoteId(noteIndex);
                                 octave = random.nextInt(9);
+                                midiPitch = octave * 12 + tonality.getEnabledNoteId(noteIndex);
                             }
-                            pitch.setAttribute("step", tonality.getNoteName(noteIndex));
-                            pitch.setAttribute("actual_accidental", tonality.getNoteAccidental(noteIndex));
+                            pitch.setAttribute("step", tonality.getNoteName(noteId));
+                            pitch.setAttribute("actual_accidental", tonality.getNoteAccidental(noteId));
                             pitch.setAttribute("octave", String.valueOf(octave));
 
                             Element printed_accidentals = doc.createElement("printed_accidentals");
                             pitch.appendChild(printed_accidentals);
-                            Element accidental = doc.createElement(s.getTonality().getNoteAccidental(noteIndex));
+                            Element accidental = doc.createElement(s.getTonality().getNoteAccidental(noteId));
                             printed_accidentals.appendChild(accidental);
                         }
                     }
