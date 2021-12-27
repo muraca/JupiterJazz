@@ -1,4 +1,4 @@
-package muraca.JupiterJazz.model;
+package muraca.JupiterJazz.model.xml;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;

@@ -1,6 +1,11 @@
-package muraca.JupiterJazz.model;
+package muraca.JupiterJazz.model.xml;
 
-import muraca.JupiterJazz.view.utils.ErrorHandler;
+import muraca.JupiterJazz.model.Constants;
+import muraca.JupiterJazz.model.Fraction;
+import muraca.JupiterJazz.model.instruments.Instrument;
+import muraca.JupiterJazz.model.session.Session;
+import muraca.JupiterJazz.model.session.Tonality;
+import muraca.JupiterJazz.view.utils.MessageHandler;
 import muraca.JupiterJazz.view.utils.FileHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -15,11 +20,19 @@ public class IEEE1599XML {
 
     private static Random random = new Random();
 
-    public static void readFromXML(File f) {
-
+    public static void readFromXML(File file) {
+        if (file == null || file.getName() == null || file.getName().isBlank()) {
+            MessageHandler.showNoFileSelectedErrorMessage();
+            return;
+        }
     }
 
     public static void saveToXML(Session s, File file) {
+        if (file == null || file.getName() == null || file.getName().isBlank()) {
+            MessageHandler.showNoFileSelectedErrorMessage();
+            return;
+        }
+
         try {
             Document doc = DocumentUtils.newDocument();
 
@@ -50,6 +63,9 @@ public class IEEE1599XML {
 
             final int measureDurationInVTU = Constants.TIME_SIGNATURES_VTU.get(Constants.TIME_SIGNATURES_FRAC.indexOf(s.getTimeSignature().toString()));
             for (Instrument instrument: s.getInstruments()) {
+                if (!instrument.isEnabled())
+                    continue;
+
                 String name = instrument.getName();
 
                 Element staff = doc.createElement("staff");
@@ -99,7 +115,7 @@ public class IEEE1599XML {
                     measure.setAttribute("number", String.valueOf(i));
 
                     Element voice = doc.createElement("voice");
-                    measure.appendChild(measure);
+                    measure.appendChild(voice);
                     voice.setAttribute("voice_item_ref", "Instrument_" + name + "_0_voice");
 
                     int currentMeasureRemainingDuration = measureDurationInVTU;
@@ -144,7 +160,7 @@ public class IEEE1599XML {
                             int noteId = -1;
                             int octave = 0;
                             int midiPitch = 0;
-                            while ((midiPitch < instrument.getMinPitch() || midiPitch > instrument.getMaxPitch()) && noteId >= 0){
+                            while ((midiPitch < instrument.getSelectedMinPitch() || midiPitch > instrument.getSelectedMaxPitch()) && noteId >= 0){
                                 int noteIndex = random.nextInt(tonality.getNumberOfEnabledNotes());
                                 noteId = tonality.getEnabledNoteId(noteIndex);
                                 octave = random.nextInt(9);
@@ -168,7 +184,7 @@ public class IEEE1599XML {
         } catch (FileNotFoundException e) {
             FileHandler.fileNotFoundExceptionInfo(file.getName());
         } catch (ParserConfigurationException | TransformerException e) {
-            ErrorHandler.xmlExportException(file.getName());
+            MessageHandler.showXMLExportErrorMessage(file.getName());
         }
     }
 }

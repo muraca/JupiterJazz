@@ -1,4 +1,6 @@
-package muraca.JupiterJazz.model;
+package muraca.JupiterJazz.model.session;
+
+import muraca.JupiterJazz.model.Notes;
 
 public class Tonality {
     private boolean[] notes = new boolean[12];

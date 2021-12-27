@@ -1,6 +1,6 @@
 package muraca.JupiterJazz.view.components.keyboard;
 
-import muraca.JupiterJazz.model.Tonality;
+import muraca.JupiterJazz.model.session.Tonality;
 
 import javax.swing.*;
 import java.awt.*;

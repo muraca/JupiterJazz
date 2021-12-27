@@ -1,16 +1,15 @@
 package muraca.JupiterJazz;
 
-import muraca.JupiterJazz.model.Session;
+import muraca.JupiterJazz.model.Constants;
+import muraca.JupiterJazz.model.session.Session;
 import muraca.JupiterJazz.view.components.*;
+import muraca.JupiterJazz.view.utils.MessageHandler;
 import muraca.JupiterJazz.view.utils.FileHandler;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class JupiterJazz extends JFrame {
-
-    public static final int WIDTH = 1200;
-    public static final int HEIGHT = 800;
 
     private CardLayout layout;
     private Container container;
@@ -21,14 +20,15 @@ public class JupiterJazz extends JFrame {
         super("Jupiter Jazz");
 
         FileHandler.setParent(this);
+        MessageHandler.setParent(this);
 
         layout = new CardLayout();
         container = getContentPane();
-        container.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        container.setPreferredSize(new Dimension(Constants.WIDTH, Constants.HEIGHT));
         container.setLayout(layout);
 
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        setLocation(dim.width/2 - WIDTH/2, dim.height/2 - HEIGHT/2);
+        setLocation(dim.width/2 - Constants.WIDTH/2, dim.height/2 - Constants.HEIGHT/2);
 
         JMenuBar menuBar = initMenuBar();
         setJMenuBar(menuBar);
@@ -49,34 +49,34 @@ public class JupiterJazz extends JFrame {
         JMenu file = new JMenu("File");
 
         JMenuItem newSession = new JMenuItem("New Session");
-        newSession.addActionListener(a -> {
+        newSession.addActionListener(l -> {
             sessionPanel.setSession(new Session());
             layout.show(container, "session");
         });
         file.add(newSession);
 
         JMenuItem openSession = new JMenuItem("Open existing Session");
-        openSession.addActionListener(a -> sessionPanel.setSession(Session.loadFromFile(FileHandler.chooseXMLFile(FileHandler.OPEN_FILE))));
+        openSession.addActionListener(l -> sessionPanel.setSession(Session.loadFromFile()));
         file.add(openSession);
 
         JMenuItem saveCurrentSession = new JMenuItem("Save current Session");
-        saveCurrentSession.addActionListener(a -> sessionPanel.getSession().saveSessionAsFile(FileHandler.chooseXMLFile(FileHandler.SAVE_FILE)));
+        saveCurrentSession.addActionListener(l -> sessionPanel.getSession().saveSessionAsFile());
         file.add(saveCurrentSession);
 
         file.addSeparator();
 
         JMenuItem importIEEE1599 = new JMenuItem("Import IEEE1599 XML file");
-        importIEEE1599.addActionListener(a -> {});
+        importIEEE1599.addActionListener(l -> {});
         file.add(importIEEE1599);
 
         JMenuItem exportIEEE1599 = new JMenuItem("Export IEEE1599 XML file");
-        exportIEEE1599.addActionListener(a -> sessionPanel.getSession().generateIEEE1599(FileHandler.chooseXMLFile(FileHandler.SAVE_FILE)));
+        exportIEEE1599.addActionListener(l -> sessionPanel.getSession().generateIEEE1599());
         file.add(exportIEEE1599);
 
         file.addSeparator();
 
         JMenuItem exportAudio = new JMenuItem("Export as audio file");
-        exportAudio.addActionListener(a -> {});
+        exportAudio.addActionListener(l -> {});
         file.add(exportAudio);
 
         menuBar.add(file);
@@ -86,14 +86,11 @@ public class JupiterJazz extends JFrame {
         JMenu help = new JMenu("Help");
 
         JMenuItem helpItem = new JMenuItem("Help");
-        helpItem.addActionListener(a -> {});
+        helpItem.addActionListener(l -> {});
         help.add(helpItem);
 
         JMenuItem about = new JMenuItem("About");
-        about.addActionListener(a -> JOptionPane.showMessageDialog(this,
-                "JupiterJazz is a project made by Matteo Muraca id 984277\nfor \"Programmazione per la musica\" course at UniMi, AA 2021/2022",
-                "About JupiterJazz",
-                JOptionPane.INFORMATION_MESSAGE));
+        about.addActionListener(l -> MessageHandler.showAboutMessage());
         help.add(about);
 
         menuBar.add(help);
@@ -119,7 +116,5 @@ public class JupiterJazz extends JFrame {
         return null;
     }
 
-    public static void main(String[] args) {
-        JupiterJazz j = new JupiterJazz();
-    }
+    public static void main(String[] args) { JupiterJazz j = new JupiterJazz(); }
 }

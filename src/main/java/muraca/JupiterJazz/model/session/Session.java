@@ -1,7 +1,14 @@
-package muraca.JupiterJazz.model;
+package muraca.JupiterJazz.model.session;
 
 import lombok.Data;
-import muraca.JupiterJazz.view.utils.ErrorHandler;
+import muraca.JupiterJazz.model.Constants;
+import muraca.JupiterJazz.model.instruments.BassInstrument;
+import muraca.JupiterJazz.model.instruments.Instrument;
+import muraca.JupiterJazz.model.instruments.PianoInstrument;
+import muraca.JupiterJazz.model.xml.DocumentUtils;
+import muraca.JupiterJazz.model.Fraction;
+import muraca.JupiterJazz.model.xml.IEEE1599XML;
+import muraca.JupiterJazz.view.utils.MessageHandler;
 import muraca.JupiterJazz.view.utils.FileHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -13,6 +20,7 @@ import javax.xml.transform.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -32,12 +40,12 @@ public class Session {
     private int minPauseDurationIndex = 4;
     private int maxPauseDurationIndex = Constants.EVENT_DURATIONS_SIZE - 3;
 
-    private int minPitch = 1;
-    private int maxPitch = 88;
-
     private Tonality tonality = new Tonality();
 
-    private List<Instrument> instruments;
+    private List<Instrument> instruments = Arrays.asList(
+            new PianoInstrument(),
+            new BassInstrument()
+    );
 
     public int getMinNoteDurationVTU() {
         return Constants.EVENT_DURATIONS_VTU.indexOf(minNoteDurationIndex);
@@ -61,10 +69,14 @@ public class Session {
         return Math.round(durationInSeconds * 10) / 10.f; //only one decimal digit
     }
 
-    public static Session loadFromFile(String pathname) { return loadFromFile(new File(pathname)); }
-
-    public static Session loadFromFile(File file) {
+    public static Session loadFromFile() {
         Session s = new Session();
+
+        File file = FileHandler.chooseXMLFile(FileHandler.OPEN_FILE);
+        if (file == null || file.getName() == null || file.getName().isBlank()) {
+            MessageHandler.showNoFileSelectedErrorMessage();
+            return s;
+        }
 
         try {
             Document doc = DocumentUtils.parse(file);
@@ -92,12 +104,6 @@ public class Session {
             } catch (Exception e) { }
 
             try {
-                Node pitch = doc.getDocumentElement().getElementsByTagName("Pitch").item(0);
-                s.setMinPitch(Integer.parseInt(pitch.getAttributes().getNamedItem("min").getTextContent()));
-                s.setMaxPitch(Integer.parseInt(pitch.getAttributes().getNamedItem("max").getTextContent()));
-            } catch (Exception e) { }
-
-            try {
                 Node tonality = doc.getDocumentElement().getElementsByTagName("Tonality").item(0);
                 for (int i = 0; i < tonality.getChildNodes().getLength(); ++i) {
                     Node note = doc.getDocumentElement().getElementsByTagName("Note").item(i);
@@ -109,15 +115,19 @@ public class Session {
             } catch (Exception e) { }
 
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            ErrorHandler.xmlImportException(file.getName());
+            MessageHandler.showXMLImportErrorMessage(file.getName());
         }
 
         return s;
     }
 
-    public void saveSessionAsFile(String pathname) { saveSessionAsFile(new File(pathname)); }
+    public void saveSessionAsFile() {
+        File file = FileHandler.chooseXMLFile(FileHandler.SAVE_FILE);
+        if (file == null || file.getName() == null || file.getName().isBlank()) {
+            MessageHandler.showNoFileSelectedErrorMessage();
+            return;
+        }
 
-    public void saveSessionAsFile(File file) {
         try {
             Document doc = DocumentUtils.newDocument();
             Element root = doc.createElement("Session");
@@ -157,11 +167,6 @@ public class Session {
             e.setAttribute("max", String.valueOf(maxPauseDurationIndex));
             root.appendChild(e);
 
-            e = doc.createElement("Pitch");
-            e.setAttribute("min", String.valueOf(minPitch));
-            e.setAttribute("max", String.valueOf(maxPitch));
-            root.appendChild(e);
-
             e = doc.createElement("Tonality");
             for (int i = 0; i < tonality.getNumberOfEnabledNotes(); ++i) {
                 Element n = doc.createElement("Note");
@@ -182,11 +187,28 @@ public class Session {
         } catch (FileNotFoundException e) {
             FileHandler.fileNotFoundExceptionInfo(file.getName());
         } catch (ParserConfigurationException | TransformerException e) {
-            ErrorHandler.xmlExportException(file.getName());
+            MessageHandler.showXMLExportErrorMessage(file.getName());
         }
     }
 
-    public void generateIEEE1599(File file) {
-        IEEE1599XML.saveToXML(this, file);
+    public void generateIEEE1599() {
+        if (isNoNoteEnabled())
+            MessageHandler.showNoNoteEnabledErrorMessage();
+        else if (isNoInstrumentEnabled())
+            MessageHandler.showNoInstrumentEnabledErrorMessage();
+        else
+            IEEE1599XML.saveToXML(this, FileHandler.chooseXMLFile(FileHandler.SAVE_FILE));
+    }
+
+    private boolean isNoNoteEnabled() {
+        return tonality.getNumberOfEnabledNotes() == 0;
+    }
+
+    private boolean isNoInstrumentEnabled() {
+        for (Instrument i: instruments) {
+            if (i.isEnabled())
+                return false;
+        }
+        return true;
     }
 }

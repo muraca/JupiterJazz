@@ -2,9 +2,9 @@ package muraca.JupiterJazz.view.components;
 
 import muraca.JupiterJazz.model.Constants;
 import muraca.JupiterJazz.model.Fraction;
-import muraca.JupiterJazz.model.Session;
+import muraca.JupiterJazz.model.session.Session;
 import muraca.JupiterJazz.view.components.keyboard.KeyboardComponent;
-import muraca.JupiterJazz.view.utils.FileHandler;
+import muraca.JupiterJazz.view.utils.ButtonTabComponent;
 import muraca.JupiterJazz.view.utils.RangeSlider;
 import muraca.JupiterJazz.view.utils.SimpleDocumentListener;
 
@@ -12,6 +12,8 @@ import javax.swing.*;
 import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.text.NumberFormat;
+
+//TODO delegate subpanels to panel classes
 
 public class SessionPanel extends JPanel {
 
@@ -33,6 +35,8 @@ public class SessionPanel extends JPanel {
 
     private KeyboardComponent keyboardComponent;
 
+    private JTabbedPane instrumentsPanel;
+
     public SessionPanel(Session session) {
         super(null);
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -42,6 +46,7 @@ public class SessionPanel extends JPanel {
         add(createNotePanel());
         add(createPausePanel());
         add(createKeyPanel());
+        add(createInstrumentsPanel());
         add(createSavePanel());
 
         setSession(session);
@@ -70,6 +75,14 @@ public class SessionPanel extends JPanel {
         pauseDurationSlider.setValues(session.getMinPauseDurationIndex(), session.getMaxPauseDurationIndex());
 
         keyboardComponent.setTonality(session.getTonality());
+
+        instrumentsPanel.removeAll();
+
+        for (int i = 0; i < session.getInstruments().size(); ++i) {
+            InstrumentPanel instrumentPanel = new InstrumentPanel(session, i);;
+            instrumentsPanel.add(session.getInstruments().get(i).getName(), instrumentPanel);
+            instrumentsPanel.setTabComponentAt(instrumentsPanel.indexOfComponent(instrumentPanel), new ButtonTabComponent(instrumentsPanel, false));
+        }
 
         revalidate();
         repaint();
@@ -123,7 +136,7 @@ public class SessionPanel extends JPanel {
         for (String t: Constants.TIME_SIGNATURES_FRAC) {
             timeSignatureComboBox.addItem(t);
         }
-        timeSignatureComboBox.addActionListener(e -> {
+        timeSignatureComboBox.addActionListener(l -> {
             session.setTimeSignature(Fraction.parseString(timeSignatureComboBox.getSelectedItem().toString()));
             durationInSecondsField.setText(String.valueOf(session.getDurationInSeconds()));
         });
@@ -256,6 +269,22 @@ public class SessionPanel extends JPanel {
         return keyPanel;
     }
 
+    private JPanel createInstrumentsPanel() {
+        JPanel instrumentsPanelWrapper = new JPanel(null);
+        instrumentsPanelWrapper.setLayout(new BoxLayout(instrumentsPanelWrapper, BoxLayout.X_AXIS));
+
+        Dimension d = new Dimension(Constants.WIDTH / 2, 150);
+        instrumentsPanelWrapper.setMinimumSize(d);
+        instrumentsPanelWrapper.setMaximumSize(d);
+        instrumentsPanelWrapper.setPreferredSize(d);
+
+        instrumentsPanel = new JTabbedPane();
+        instrumentsPanelWrapper.add(instrumentsPanel);
+
+        instrumentsPanel.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
+        return instrumentsPanelWrapper;
+    }
+
     private JPanel createSavePanel() {
         JPanel savePanel = new JPanel(new FlowLayout());
 
@@ -263,14 +292,14 @@ public class SessionPanel extends JPanel {
         saveSessionButton.setMinimumSize(new Dimension(256, 64));
         saveSessionButton.setMaximumSize(new Dimension(256, 64));
         saveSessionButton.setPreferredSize(new Dimension(256, 64));
-        saveSessionButton.addActionListener(e -> session.saveSessionAsFile(FileHandler.chooseXMLFile(FileHandler.SAVE_FILE)));
+        saveSessionButton.addActionListener(l -> session.saveSessionAsFile());
         savePanel.add(saveSessionButton);
 
         JButton generateIEEE1599Button = new JButton("Generate IEEE1599");
         generateIEEE1599Button.setMinimumSize(new Dimension(256, 64));
         generateIEEE1599Button.setMaximumSize(new Dimension(256, 64));
         generateIEEE1599Button.setPreferredSize(new Dimension(256, 64));
-        generateIEEE1599Button.addActionListener(e -> session.generateIEEE1599(FileHandler.chooseXMLFile(FileHandler.SAVE_FILE)));
+        generateIEEE1599Button.addActionListener(l -> session.generateIEEE1599());
         savePanel.add(generateIEEE1599Button);
 
         return savePanel;

@@ -35,4 +35,11 @@ public class Notes {
         String compactName = NOTE_COMPACTNAMES[noteId][pos];
         return ACCIDENTALS.get(compactName.substring(1));
     }
+
+    public static String midiToEnglish(int midiPitch) {
+        StringBuilder res = new StringBuilder();
+        res.append(NOTE_COMPACTNAMES[midiPitch % 12][0]);
+        res.append(midiPitch / 12 - 1);
+        return res.toString();
+    }
 }
