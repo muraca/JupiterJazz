@@ -86,7 +86,7 @@ public class JupiterJazz extends JFrame {
         JMenu help = new JMenu("Help");
 
         JMenuItem helpItem = new JMenuItem("Help");
-        helpItem.addActionListener(l -> {});
+        helpItem.addActionListener(l -> MessageHandler.showHelpMessage());
         help.add(helpItem);
 
         JMenuItem about = new JMenuItem("About");

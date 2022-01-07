@@ -6,7 +6,7 @@ import java.awt.*;
 public class MessageHandler {
     private Component parent;
 
-    private static MessageHandler instance = new MessageHandler();
+    private static final MessageHandler instance = new MessageHandler();
 
     public static void setParent(Component parent) {
         instance.parent = parent;
@@ -47,9 +47,19 @@ public class MessageHandler {
                 JOptionPane.ERROR_MESSAGE);
     }
 
+    public static void showHelpMessage() {
+        JOptionPane.showMessageDialog(instance.parent,
+                "JupiterJazz is a random IEEE1599 generator.\n" +
+                    "All the parameters for the generation can be set in the main view." +
+                    "The configuration can be exported in XML.",
+                "Help",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
     public static void showAboutMessage() {
         JOptionPane.showMessageDialog(instance.parent,
-                "JupiterJazz is a project made by Matteo Muraca id 984277\nfor \"Programmazione per la musica\" course at UniMi, AA 2021/2022",
+                "JupiterJazz is a project made by Matteo Muraca id 984277 " +
+                    "for \"Programmazione per la musica\" course at UniMi, AA 2021/2022",
                 "About JupiterJazz",
                 JOptionPane.INFORMATION_MESSAGE);
     }
