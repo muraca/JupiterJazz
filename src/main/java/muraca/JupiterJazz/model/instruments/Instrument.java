@@ -1,11 +1,13 @@
 package muraca.JupiterJazz.model.instruments;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 public abstract class Instrument {
+    public Instrument() { resetParameterValues(); }
+
+    public abstract void resetParameterValues();
+
     public abstract String getClefShape();
     public abstract String getClefStaffStep();
 
@@ -26,5 +28,7 @@ public abstract class Instrument {
 
     public abstract String getName();
 
-    private boolean enabled = true;
+    private boolean enabled = false;
+
+    public abstract int getMIDIInstrumentID();
 }

@@ -1,11 +1,16 @@
 package muraca.JupiterJazz.model.instruments;
 
+import jm.constants.Pitches;
+import jm.constants.ProgramChanges;
+
 public class BassInstrument extends Instrument {
-    public BassInstrument() {
-        setMinPitch(28);
-        setMaxPitch(55);
-        setSelectedMinPitch(28);
-        setSelectedMaxPitch(55);
+    @Override
+    public void resetParameterValues() {
+        setMinPitch(Pitches.E0);
+        setMaxPitch(Pitches.G3);
+
+        setSelectedMinPitch(Pitches.E0);
+        setSelectedMaxPitch(Pitches.G2);
     }
 
     @Override
@@ -16,4 +21,8 @@ public class BassInstrument extends Instrument {
 
     @Override
     public String getName() { return "Bass"; }
+
+    @Override
+    public int getMIDIInstrumentID() { return ProgramChanges.ACOUSTIC_BASS; }
+
 }

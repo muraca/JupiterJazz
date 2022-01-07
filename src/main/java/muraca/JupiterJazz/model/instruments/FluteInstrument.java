@@ -1,14 +1,16 @@
 package muraca.JupiterJazz.model.instruments;
 
-
 import jm.constants.Pitches;
 import jm.constants.ProgramChanges;
 
-public class PianoInstrument extends Instrument {
+public class FluteInstrument extends Instrument {
     @Override
     public void resetParameterValues() {
-        setSelectedMinPitch(Pitches.C1);
-        setSelectedMaxPitch(Pitches.B6);
+        setMinPitch(Pitches.C4);
+        setMaxPitch(Pitches.C6);
+
+        setSelectedMinPitch(Pitches.C4);
+        setSelectedMaxPitch(Pitches.C6);
     }
 
     @Override
@@ -18,9 +20,9 @@ public class PianoInstrument extends Instrument {
     public String getClefStaffStep() { return "2"; }
 
     @Override
-    public String getName() { return "Piano"; }
+    public String getName() { return "Flute"; }
 
     @Override
-    public int getMIDIInstrumentID() { return ProgramChanges.PIANO; }
+    public int getMIDIInstrumentID() { return ProgramChanges.FLUTE; }
 
 }
