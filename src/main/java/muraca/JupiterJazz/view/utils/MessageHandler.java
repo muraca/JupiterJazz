@@ -47,10 +47,18 @@ public class MessageHandler {
                 JOptionPane.ERROR_MESSAGE);
     }
 
+    public static void showDuplicateInstrumentErrorMessage() {
+        JOptionPane.showMessageDialog(instance.parent,
+                "Duplicate instruments are not allowed.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+    }
+
     public static void showHelpMessage() {
         JOptionPane.showMessageDialog(instance.parent,
                 "JupiterJazz is a random IEEE1599 generator.\n" +
-                    "All the parameters for the generation can be set in the main view." +
+                        "The instruments correspond to the General MIDI instruments.\n" +
+                    "All the parameters for the generation can be set in the main view.\n" +
                     "The configuration can be exported in XML.",
                 "Help",
                 JOptionPane.INFORMATION_MESSAGE);
