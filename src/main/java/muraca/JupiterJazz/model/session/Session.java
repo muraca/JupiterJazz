@@ -2,18 +2,18 @@ package muraca.JupiterJazz.model.session;
 
 import lombok.Data;
 import muraca.JupiterJazz.model.Constants;
-import muraca.JupiterJazz.model.xml.DocumentUtils;
 import muraca.JupiterJazz.model.Fraction;
+import muraca.JupiterJazz.model.xml.DocumentUtils;
 import muraca.JupiterJazz.model.xml.IEEE1599XML;
-import muraca.JupiterJazz.view.utils.MessageHandler;
 import muraca.JupiterJazz.view.utils.FileHandler;
+import muraca.JupiterJazz.view.utils.MessageHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
+import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -113,13 +113,17 @@ public class Session {
             try {
                 Node instruments = doc.getDocumentElement().getElementsByTagName("Instruments").item(0);
                 for (int i = 0; i < instruments.getChildNodes().getLength(); ++i) {
-                    Node instrument = doc.getDocumentElement().getElementsByTagName("Instrument").item(i);
-                    int id = Integer.valueOf(instrument.getAttributes().getNamedItem("id").getTextContent());
-                    Instrument instr = new Instrument(id);
-                    instr.setClefShape(instrument.getAttributes().getNamedItem("clef_shape").getTextContent());
-                    instr.setClefStaffStep(Integer.parseInt(instrument.getAttributes().getNamedItem("clef_staff_step").getTextContent()));
-                    instr.setMinPitch(Integer.parseInt(instrument.getAttributes().getNamedItem("min_pitch").getTextContent()));
-                    instr.setMaxPitch(Integer.parseInt(instrument.getAttributes().getNamedItem("max_pitch").getTextContent()));
+                    try {
+                        Node instrument = doc.getDocumentElement().getElementsByTagName("Instrument").item(i);
+                        int id = Integer.valueOf(instrument.getAttributes().getNamedItem("id").getTextContent());
+                        Instrument instr = s.createNewInstrument();
+                        instr.setId(id);
+                        instr.setClefShape(instrument.getAttributes().getNamedItem("clef_shape").getTextContent());
+                        instr.setClefStaffStep(instrument.getAttributes().getNamedItem("clef_staff_step").getTextContent());
+                        instr.setMinPitch(Integer.parseInt(instrument.getAttributes().getNamedItem("min_pitch").getTextContent()));
+                        instr.setMaxPitch(Integer.parseInt(instrument.getAttributes().getNamedItem("max_pitch").getTextContent()));
+                        instr.setEnabled(Boolean.parseBoolean(instrument.getAttributes().getNamedItem("enabled").getTextContent()));
+                    } catch (Exception e) { }
                 }
             } catch (Exception e) { }
 
@@ -193,19 +197,19 @@ public class Session {
 
             e = doc.createElement("Instruments");
             for (Instrument instrument: instruments) {
-                if (instrument.isEnabled()) {
-                    Element i = doc.createElement("Instrument");
-                    i.setAttribute("id", String.valueOf(instrument.getId()));
-                    i.setAttribute("clef_shape", instrument.getClefShape());
-                    i.setAttribute("clef_staff_step", String.valueOf(instrument.getClefStaffStep()));
-                    i.setAttribute("min_pitch", String.valueOf(instrument.getMinPitch()));
-                    i.setAttribute("max_pitch", String.valueOf(instrument.getMaxPitch()));
-                    e.appendChild(i);
-                }
+                Element i = doc.createElement("Instrument");
+                i.setAttribute("id", String.valueOf(instrument.getId()));
+                i.setAttribute("clef_shape", instrument.getClefShape());
+                i.setAttribute("clef_staff_step", instrument.getClefStaffStep());
+                i.setAttribute("min_pitch", String.valueOf(instrument.getMinPitch()));
+                i.setAttribute("max_pitch", String.valueOf(instrument.getMaxPitch()));
+                i.setAttribute("enabled", String.valueOf(instrument.isEnabled()));
+                e.appendChild(i);
             }
             root.appendChild(e);
 
             DocumentUtils.transform(doc, file);
+            MessageHandler.showXMLExportCompletedMessage(file.getName());
 
         } catch (FileNotFoundException e) {
             FileHandler.fileNotFoundExceptionInfo(file.getName());

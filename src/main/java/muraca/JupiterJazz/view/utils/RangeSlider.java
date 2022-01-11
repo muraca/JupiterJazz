@@ -1,6 +1,6 @@
 package muraca.JupiterJazz.view.utils;
 
-import javax.swing.JSlider;
+import javax.swing.*;
 
 /**
  * https://github.com/ernieyu/Swing-range-slider

@@ -5,17 +5,16 @@ import muraca.JupiterJazz.model.Fraction;
 import muraca.JupiterJazz.model.session.Instrument;
 import muraca.JupiterJazz.model.session.Session;
 import muraca.JupiterJazz.model.session.Tonality;
-import muraca.JupiterJazz.view.utils.MessageHandler;
 import muraca.JupiterJazz.view.utils.FileHandler;
+import muraca.JupiterJazz.view.utils.MessageHandler;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Random;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 public class IEEE1599XML {
 
@@ -34,6 +33,7 @@ public class IEEE1599XML {
             Element root = doc.createElement("ieee1599");
             root.setAttribute("creator", "JupiterJazz");
             root.setAttribute("version", "1.0");
+            doc.appendChild(root);
 
             Element general = doc.createElement("general");
             root.appendChild(general);
@@ -127,7 +127,9 @@ public class IEEE1599XML {
                             maxDurationIndex = Math.min(Constants.EVENT_DURATIONS_VTU.indexOf(currentMeasureRemainingDuration),
                                                         isRest ? s.getMaxPauseDurationIndex() : s.getMaxNoteDurationIndex()),
 
-                            eventDurationIndex = random.nextInt(maxDurationIndex - minDurationIndex + 1) + minDurationIndex,
+                            eventDurationIndex = minDurationIndex >= maxDurationIndex ? maxDurationIndex :
+                                    random.nextInt(maxDurationIndex - minDurationIndex + 1) + minDurationIndex,
+
                             eventDurationVTU = Constants.EVENT_DURATIONS_VTU.get(eventDurationIndex);
 
                         Fraction eventDuration = Fraction.parseString(Constants.EVENT_DURATIONS_FRAC.get(eventDurationIndex));
@@ -157,8 +159,8 @@ public class IEEE1599XML {
 
                             int minPitch = instrument.getMinPitch(),
                                 maxPitch = instrument.getMaxPitch(),
-                                minOctave = minPitch % 12,
-                                maxOctave = maxPitch % 12,
+                                minOctave = Math.floorDiv(minPitch, 12),
+                                maxOctave = Math.floorDiv(maxPitch, 12),
                                 randomOctaveBound = maxOctave - minOctave + 1,
                                 enabledNotes = tonality.getNumberOfEnabledNotes(),
                                 noteId = -1,
@@ -186,6 +188,7 @@ public class IEEE1599XML {
             }
 
             DocumentUtils.transform(doc, file);
+            MessageHandler.showXMLExportCompletedMessage(file.getName());
 
         } catch (FileNotFoundException e) {
             FileHandler.fileNotFoundExceptionInfo(file.getName());

@@ -2,13 +2,15 @@ package muraca.JupiterJazz.model.session;
 
 import lombok.Data;
 
+import java.util.stream.IntStream;
+
 @Data
 public class Instrument {
     private int id;
     private int minPitch = 0;
     private int maxPitch = 127;
-    private String clefShape;
-    private int clefStaffStep;
+    private String clefShape = "G";
+    private String clefStaffStep = "0";
     private boolean enabled = false;
 
     public Instrument(int id) { this.id = id; }
@@ -16,9 +18,40 @@ public class Instrument {
     public void setMinPitch(int pitch) { minPitch = Math.max(pitch, 0); }
     public void setMaxPitch(int pitch) { maxPitch = Math.min(pitch, 127); }
 
-    public String getName() {
-        return INSTRUMENTS[id];
+    public void setClefShape(String shape) {
+        int index = IntStream.range(0, CLEF_SHAPES.length)
+                .filter(idx -> shape.equalsIgnoreCase(CLEF_SHAPES[idx]))
+                .findFirst().orElse(0);
+        clefShape = CLEF_SHAPES[index];
     }
+
+    public void setClefStaffStep(String step) {
+        int index = IntStream.range(0, CLEF_STAFF_STEPS.length)
+                .filter(idx -> step.equalsIgnoreCase(CLEF_STAFF_STEPS[idx]))
+                .findFirst().orElse(0);
+        clefStaffStep = CLEF_STAFF_STEPS[index];
+    }
+
+    public String getName() { return INSTRUMENTS[id]; }
+
+
+    public static String[] CLEF_SHAPES = {
+            "G",
+            "F",
+            "C"
+    };
+
+    public static String[] CLEF_STAFF_STEPS = {
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8"
+    };
 
     public static String[] INSTRUMENTS = {
             "Acoustic Grand Piano",

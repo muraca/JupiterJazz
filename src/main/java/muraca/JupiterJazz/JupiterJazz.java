@@ -3,8 +3,8 @@ package muraca.JupiterJazz;
 import muraca.JupiterJazz.model.Constants;
 import muraca.JupiterJazz.model.session.Session;
 import muraca.JupiterJazz.view.components.SessionPanel;
-import muraca.JupiterJazz.view.utils.MessageHandler;
 import muraca.JupiterJazz.view.utils.FileHandler;
+import muraca.JupiterJazz.view.utils.MessageHandler;
 
 import javax.swing.*;
 import java.awt.*;

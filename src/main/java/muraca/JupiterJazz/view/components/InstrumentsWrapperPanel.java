@@ -1,10 +1,10 @@
 package muraca.JupiterJazz.view.components;
 
 import muraca.JupiterJazz.model.Constants;
+import muraca.JupiterJazz.model.HasSession;
 import muraca.JupiterJazz.model.session.Instrument;
 import muraca.JupiterJazz.model.session.Session;
 import muraca.JupiterJazz.view.utils.ButtonTabComponent;
-import muraca.JupiterJazz.model.HasSession;
 
 import javax.swing.*;
 import java.awt.*;

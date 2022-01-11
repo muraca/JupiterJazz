@@ -26,6 +26,13 @@ public class MessageHandler {
                 JOptionPane.ERROR_MESSAGE);
     }
 
+    public static void showXMLExportCompletedMessage(String filename) {
+        JOptionPane.showMessageDialog(instance.parent,
+                "Export to " + filename + " was successfully completed.",
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
     public static void showNoFileSelectedErrorMessage() {
         JOptionPane.showMessageDialog(instance.parent,
                 "No file selected!",
@@ -57,7 +64,7 @@ public class MessageHandler {
     public static void showHelpMessage() {
         JOptionPane.showMessageDialog(instance.parent,
                 "JupiterJazz is a random IEEE1599 generator.\n" +
-                        "The instruments correspond to the General MIDI instruments.\n" +
+                    "The instruments correspond to the General MIDI instruments.\n" +
                     "All the parameters for the generation can be set in the main view.\n" +
                     "The configuration can be exported in XML.",
                 "Help",

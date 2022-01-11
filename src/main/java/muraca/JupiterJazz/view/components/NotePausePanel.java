@@ -1,8 +1,8 @@
 package muraca.JupiterJazz.view.components;
 
 import muraca.JupiterJazz.model.Constants;
-import muraca.JupiterJazz.model.session.Session;
 import muraca.JupiterJazz.model.HasSession;
+import muraca.JupiterJazz.model.session.Session;
 import muraca.JupiterJazz.view.utils.RangeSlider;
 
 import javax.swing.*;

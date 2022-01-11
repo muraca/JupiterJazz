@@ -1,8 +1,8 @@
 package muraca.JupiterJazz.view.components.keyboard;
 
+import muraca.JupiterJazz.model.HasSession;
 import muraca.JupiterJazz.model.session.Session;
 import muraca.JupiterJazz.model.session.Tonality;
-import muraca.JupiterJazz.model.HasSession;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,7 +1,7 @@
 package muraca.JupiterJazz.view.components;
 
-import muraca.JupiterJazz.model.session.Session;
 import muraca.JupiterJazz.model.HasSession;
+import muraca.JupiterJazz.model.session.Session;
 
 import javax.swing.*;
 import java.awt.*;
