@@ -2,7 +2,6 @@ package muraca.JupiterJazz.model.session;
 
 import lombok.Data;
 import muraca.JupiterJazz.model.Constants;
-import muraca.JupiterJazz.model.instruments.*;
 import muraca.JupiterJazz.model.xml.DocumentUtils;
 import muraca.JupiterJazz.model.Fraction;
 import muraca.JupiterJazz.model.xml.IEEE1599XML;
@@ -18,7 +17,10 @@ import javax.xml.transform.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 public class Session {
@@ -39,7 +41,7 @@ public class Session {
 
     private Tonality tonality = new Tonality();
 
-    private final List<Instrument> instruments = InstrumentsManager.getInstrumentsAfterReset();
+    private final ArrayList<Instrument> instruments = new ArrayList<Instrument>();
 
     public int getMinNoteDurationVTU() {
         return Constants.EVENT_DURATIONS_VTU.indexOf(minNoteDurationIndex);
@@ -112,11 +114,12 @@ public class Session {
                 Node instruments = doc.getDocumentElement().getElementsByTagName("Instruments").item(0);
                 for (int i = 0; i < instruments.getChildNodes().getLength(); ++i) {
                     Node instrument = doc.getDocumentElement().getElementsByTagName("Instrument").item(i);
-                    String name = instrument.getAttributes().getNamedItem("name").getTextContent();
-                    Instrument instr = InstrumentsManager.getInstrumentByName(name);
-                    instr.setEnabled(true);
-                    instr.setSelectedMinPitch(Integer.parseInt(instrument.getAttributes().getNamedItem("selected_min_pitch").getTextContent()));
-                    instr.setSelectedMaxPitch(Integer.parseInt(instrument.getAttributes().getNamedItem("selected_max_pitch").getTextContent()));
+                    int id = Integer.valueOf(instrument.getAttributes().getNamedItem("id").getTextContent());
+                    Instrument instr = new Instrument(id);
+                    instr.setClefShape(instrument.getAttributes().getNamedItem("clef_shape").getTextContent());
+                    instr.setClefStaffStep(Integer.parseInt(instrument.getAttributes().getNamedItem("clef_staff_step").getTextContent()));
+                    instr.setMinPitch(Integer.parseInt(instrument.getAttributes().getNamedItem("min_pitch").getTextContent()));
+                    instr.setMaxPitch(Integer.parseInt(instrument.getAttributes().getNamedItem("max_pitch").getTextContent()));
                 }
             } catch (Exception e) { }
 
@@ -192,9 +195,11 @@ public class Session {
             for (Instrument instrument: instruments) {
                 if (instrument.isEnabled()) {
                     Element i = doc.createElement("Instrument");
-                    i.setAttribute("name", instrument.getName());
-                    i.setAttribute("selected_min_pitch", String.valueOf(instrument.getSelectedMinPitch()));
-                    i.setAttribute("selected_max_pitch", String.valueOf(instrument.getSelectedMaxPitch()));
+                    i.setAttribute("id", String.valueOf(instrument.getId()));
+                    i.setAttribute("clef_shape", instrument.getClefShape());
+                    i.setAttribute("clef_staff_step", String.valueOf(instrument.getClefStaffStep()));
+                    i.setAttribute("min_pitch", String.valueOf(instrument.getMinPitch()));
+                    i.setAttribute("max_pitch", String.valueOf(instrument.getMaxPitch()));
                     e.appendChild(i);
                 }
             }
@@ -212,10 +217,33 @@ public class Session {
     public void generateIEEE1599() {
         if (tonality.getNumberOfEnabledNotes() == 0)
             MessageHandler.showNoNoteEnabledErrorMessage();
-        else if (InstrumentsManager.isNoInstrumentEnabled())
+        else if (isNoInstrumentEnabled())
             MessageHandler.showNoInstrumentEnabledErrorMessage();
+        else if (isAnyDuplicateInstrument())
+            MessageHandler.showDuplicateInstrumentErrorMessage();
         else
-            IEEE1599XML.saveToXML(this, FileHandler.chooseXMLFile(FileHandler.SAVE_FILE));
+            IEEE1599XML.saveToXML(this);
     }
 
+    public boolean isNoInstrumentEnabled() {
+        for (Instrument i: instruments) {
+            if (i.isEnabled())
+                return false;
+        }
+        return true;
+    }
+
+    public boolean isAnyDuplicateInstrument() {
+        HashSet<Integer> ids = new HashSet<>();
+        Set<Instrument> duplicateIds = instruments.stream()
+                .filter(n -> !ids.add(n.getId()))
+                .collect(Collectors.toSet());
+        return !duplicateIds.isEmpty();
+    }
+
+    public Instrument createNewInstrument() {
+        Instrument i = new Instrument(0);
+        instruments.add(i);
+        return i;
+    }
 }

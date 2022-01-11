@@ -1,11 +1,13 @@
 package muraca.JupiterJazz.view.components.keyboard;
 
+import muraca.JupiterJazz.model.session.Session;
 import muraca.JupiterJazz.model.session.Tonality;
+import muraca.JupiterJazz.model.HasSession;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class KeyboardComponent extends JPanel {
+public class KeyboardComponent extends JPanel implements HasSession {
     private WhiteKey[] whites;
     private BlackKey[] blacks;
 
@@ -30,26 +32,15 @@ public class KeyboardComponent extends JPanel {
         int count = getComponentCount();
         Component last = getComponent(count - 1);
         Rectangle bounds = last.getBounds();
-        int width = 10 + bounds.x + bounds.width;
-        int height = 10 + bounds.y + bounds.height;
+        int width = 10 + bounds.x + bounds.width,
+            height = 10 + bounds.y + bounds.height;
         Dimension d = new Dimension(width, height);
         setMinimumSize(d);
         setMaximumSize(d);
         setPreferredSize(d);
 
+        setAlignmentX(CENTER_ALIGNMENT);
         repaint();
-    }
-
-    public void setTonality(Tonality tonality) {
-        this.tonality = tonality;
-        for (BlackKey b : blacks) {
-            b.setToggled(tonality.isNoteEnabled(b.getNote()));
-            b.setSelectedName(tonality.getNoteNamePos(b.getNote()));
-        }
-        for (WhiteKey w : whites) {
-            w.setToggled(tonality.isNoteEnabled(w.getNote()));
-            w.setSelectedName(tonality.getNoteNamePos(w.getNote()));
-        }
     }
 
     public void setToggled(int noteId, boolean toggled) {
@@ -65,25 +56,17 @@ public class KeyboardComponent extends JPanel {
         tonality.setNoteName(noteId, position);
     }
 
-
-/*
-    public void updateTonality() {
-        for (BlackKey b: blacks) {
-            if (b.isToggled())
-                tonality.enableNote(b.getNote());
-            else
-                tonality.disableNote(b.getNote());
-            tonality.setNoteName(b.getNote(), b.getNoteName());
-            tonality.setNoteAccidental(b.getNote(), b.getNoteAccidental());
+    @Override
+    public void setSession(Session s) {
+        tonality = s.getTonality();
+        for (BlackKey b : blacks) {
+            b.setToggled(tonality.isNoteEnabled(b.getNote()));
+            b.setSelectedName(tonality.getNoteNamePos(b.getNote()));
         }
-        for (WhiteKey w: whites) {
-            if (w.isToggled())
-                tonality.enableNote(w.getNote());
-            else
-                tonality.disableNote(w.getNote());
-            tonality.setNoteName(w.getNote(), w.getNoteName());
-            tonality.setNoteAccidental(w.getNote(), w.getNoteAccidental());
+        for (WhiteKey w : whites) {
+            w.setToggled(tonality.isNoteEnabled(w.getNote()));
+            w.setSelectedName(tonality.getNoteNamePos(w.getNote()));
         }
-    }*/
+    }
 
 }

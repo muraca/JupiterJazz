@@ -2,13 +2,11 @@ package muraca.JupiterJazz.model.xml;
 
 import muraca.JupiterJazz.model.Constants;
 import muraca.JupiterJazz.model.Fraction;
-import muraca.JupiterJazz.model.instruments.Instrument;
+import muraca.JupiterJazz.model.session.Instrument;
 import muraca.JupiterJazz.model.session.Session;
 import muraca.JupiterJazz.model.session.Tonality;
 import muraca.JupiterJazz.view.utils.MessageHandler;
 import muraca.JupiterJazz.view.utils.FileHandler;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -16,19 +14,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Random;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 public class IEEE1599XML {
 
     private static Random random = new Random();
 
-    public static void readFromXML(File file) {
-        if (file == null || file.getName() == null || file.getName().isBlank()) {
-            MessageHandler.showNoFileSelectedErrorMessage();
-            return;
-        }
-    }
-
-    public static void saveToXML(Session s, File file) {
-        if (file == null || file.getName() == null || file.getName().isBlank()) {
+    public static void saveToXML(Session s) {
+        File file = FileHandler.chooseXMLFile(FileHandler.SAVE_FILE);
+        if (file == null || file.getName().isBlank()) {
             MessageHandler.showNoFileSelectedErrorMessage();
             return;
         }
@@ -37,7 +32,7 @@ public class IEEE1599XML {
             Document doc = DocumentUtils.newDocument();
 
             Element root = doc.createElement("ieee1599");
-            root.setAttribute("creator", s.getAuthor());
+            root.setAttribute("creator", "JupiterJazz");
             root.setAttribute("version", "1.0");
 
             Element general = doc.createElement("general");
@@ -66,7 +61,7 @@ public class IEEE1599XML {
                 if (!instrument.isEnabled())
                     continue;
 
-                String name = instrument.getName();
+                String name = String.valueOf(instrument.getId());
 
                 Element staff = doc.createElement("staff");
                 staff_list.appendChild(staff);
@@ -92,7 +87,7 @@ public class IEEE1599XML {
                 clef.setAttribute("event_ref", "Clef_Instrument_" + name + "_1");
                 clef.setAttribute("octave_num", "0");
                 clef.setAttribute("shape", instrument.getClefShape());
-                clef.setAttribute("staff_step", instrument.getClefStaffStep());
+                clef.setAttribute("staff_step", String.valueOf(instrument.getClefStaffStep()));
 
                 Element clefEvent = doc.createElement("event");
                 spine.appendChild(clefEvent);
@@ -119,8 +114,8 @@ public class IEEE1599XML {
                     voice.setAttribute("voice_item_ref", "Instrument_" + name + "_0_voice");
 
                     int currentMeasureRemainingDuration = measureDurationInVTU;
-                    while (currentMeasureRemainingDuration != 0) {
-                        String eventId = "Instrument_" + name + "_voice0_measure1_ev"+voice.getChildNodes().getLength();
+                    while (currentMeasureRemainingDuration > 0) {
+                        String eventId = "Instrument_" + name + "_voice0_measure1_ev" + voice.getChildNodes().getLength();
 
                         boolean isRest = random.nextInt(100) < s.getPauseProbability();
                         if (isRest && currentMeasureRemainingDuration > s.getMaxPauseDurationVTU() && //min pause is longer than remaining time
@@ -128,13 +123,15 @@ public class IEEE1599XML {
                             isRest = false; //must be a note
                         }
 
-                        int minDurationIndex = isRest ? s.getMinPauseDurationIndex() : s.getMinNoteDurationIndex();
-                        int maxDurationIndex = Math.min(Constants.EVENT_DURATIONS_VTU.indexOf(currentMeasureRemainingDuration),
-                                                        isRest ? s.getMaxPauseDurationIndex() : s.getMaxNoteDurationIndex());;
+                        int minDurationIndex = isRest ? s.getMinPauseDurationIndex() : s.getMinNoteDurationIndex(),
+                            maxDurationIndex = Math.min(Constants.EVENT_DURATIONS_VTU.indexOf(currentMeasureRemainingDuration),
+                                                        isRest ? s.getMaxPauseDurationIndex() : s.getMaxNoteDurationIndex()),
 
-                        int eventDurationIndex = random.nextInt(maxDurationIndex - minDurationIndex + 1) + minDurationIndex;
-                        int eventDurationVTU = Constants.EVENT_DURATIONS_VTU.get(eventDurationIndex);
+                            eventDurationIndex = random.nextInt(maxDurationIndex - minDurationIndex + 1) + minDurationIndex,
+                            eventDurationVTU = Constants.EVENT_DURATIONS_VTU.get(eventDurationIndex);
+
                         Fraction eventDuration = Fraction.parseString(Constants.EVENT_DURATIONS_FRAC.get(eventDurationIndex));
+                        currentMeasureRemainingDuration -= eventDurationVTU;
 
                         Element event = doc.createElement("event");
                         spine.appendChild(event);
@@ -157,13 +154,22 @@ public class IEEE1599XML {
                             Element pitch = doc.createElement("pitch");
                             notehead.appendChild(pitch);
                             Tonality tonality = s.getTonality();
-                            int noteId = -1;
-                            int octave = 0;
-                            int midiPitch = 0;
-                            while ((midiPitch < instrument.getSelectedMinPitch() || midiPitch > instrument.getSelectedMaxPitch()) && noteId >= 0){
-                                int noteIndex = random.nextInt(tonality.getNumberOfEnabledNotes());
+
+                            int minPitch = instrument.getMinPitch(),
+                                maxPitch = instrument.getMaxPitch(),
+                                minOctave = minPitch % 12,
+                                maxOctave = maxPitch % 12,
+                                randomOctaveBound = maxOctave - minOctave + 1,
+                                enabledNotes = tonality.getNumberOfEnabledNotes(),
+                                noteId = -1,
+                                octave = 0,
+                                midiPitch = 0;
+
+                            while (midiPitch < minPitch || midiPitch > maxPitch) {
+                                int noteIndex = random.nextInt(enabledNotes);
                                 noteId = tonality.getEnabledNoteId(noteIndex);
-                                octave = random.nextInt(9);
+                                octave = random.nextInt(randomOctaveBound) + minOctave;
+
                                 midiPitch = octave * 12 + tonality.getEnabledNoteId(noteIndex);
                             }
                             pitch.setAttribute("step", tonality.getNoteName(noteId));
