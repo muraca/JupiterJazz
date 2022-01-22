@@ -115,7 +115,7 @@ public class IEEE1599XML {
 
                     int currentMeasureRemainingDuration = measureDurationInVTU;
                     while (currentMeasureRemainingDuration > 0) {
-                        String eventId = "Instrument_" + name + "_voice0_measure1_ev" + voice.getChildNodes().getLength();
+                        String eventId = "Instrument_" + name + "_voice0_measure" + i  + "_ev" + voice.getChildNodes().getLength();
 
                         boolean isRest = random.nextInt(100) < s.getPauseProbability();
                         if (isRest && currentMeasureRemainingDuration > s.getMaxPauseDurationVTU() && //min pause is longer than remaining time
